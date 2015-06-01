@@ -38,20 +38,27 @@
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
 
+// Header file for TriggerResults
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+
+
 #include <vector>
 
 #include "TTree.h"
 #include "TFile.h"
+#include <cmath>
 #include "TLorentzVector.h"
 #include <fstream>
 #include <iostream>
-
-
+#include "TVector.h"
+ 
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 
 //#include "FWCore/ParameterSet/interface/InputTag.h"
+
 
 
 //
@@ -79,46 +86,98 @@ class GenSimAnalyzer : public edm::EDAnalyzer {
       //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
       //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
       virtual void AddBranch(std::vector<double>*, std::string name);
+      virtual void AddBranch(std::vector<int>*, std::string name);
+      virtual void AddBranch(int* vec, std::string name);
 
       // ----------member data ---------------------------
-      //edm::InputTag genParticles;
+      
+      edm::InputTag GenPart_;
+      edm::InputTag GenJetAk4_;
+      edm::InputTag GenMetTru_;
+      edm::InputTag GenMetCal_;
+      edm::InputTag trigTag_;
+
+      // Few Boolean InputTags
+      bool      Verbose_;
+      bool      SortGen_;
+      bool      wantLocalFile_; 
+      bool      wantRFIOFile_;  
+      std::string       loutputFile_;
+      std::string       rfoutputFile_;
+
       edm::Service<TFileService> fs;
-      TFile * file;
+      TFile * outputFile_;
       TTree* tree;
 
-      std::vector<double> genLepVx_	;
-      std::vector<double> genLepVy_	;
-      std::vector<double> genLepVz_	;
-      std::vector<double> genLepCharge_	;
-      std::vector<double> genLepMass_	;
-      std::vector<double> genLepPt_	;
-      std::vector<double> genLepEta_	;
-      std::vector<double> genLepPhi_	;
-      std::vector<double> genLepTheta_	;
+      // Event Properties                                                                                                                             
+      int run;
+      int event;
+      int orbit;
+      int bx;
+      int lumis;
+      int isData;
+ 
 
-      std::vector<double> genJetVx_	;
-      std::vector<double> genJetVy_	;
-      std::vector<double> genJetVz_	;
-      std::vector<double> genJetCharge_	;
-      std::vector<double> genJetMass_	;
-      std::vector<double> genJetPt_	;
-      std::vector<double> genJetEta_	;
-      std::vector<double> genJetPhi_	;
-      std::vector<double> genJetTheta_	;
+      std::vector<double> GSLepVx_	;
+      std::vector<double> GSLepVy_	;
+      std::vector<double> GSLepVz_	;
+      std::vector<double> GSLepCharge_	;
+      std::vector<double> GSLepMass_	;
+      std::vector<double> GSLepPt_	;
+      std::vector<double> GSLepEta_	;
+      std::vector<double> GSLepPhi_	;
+      std::vector<double> GSLepTheta_	;
 
-      std::vector<double> genMetVx_	;
-      std::vector<double> genMetVy_	;
-      std::vector<double> genMetVz_	;
-      std::vector<double> genMetCharge_	;
-      std::vector<double> genMetMass_	;
-      std::vector<double> genMetPt_	;
-      std::vector<double> genMetEta_	;
-      std::vector<double> genMetPhi_	;
-      std::vector<double> genMetTheta_	;
+      std::vector<double> GSJetVx_	;
+      std::vector<double> GSJetVy_	;
+      std::vector<double> GSJetVz_	;
+      std::vector<double> GSJetCharge_	;
+      std::vector<double> GSJetMass_	;
+      std::vector<double> GSJetPt_	;
+      std::vector<double> GSJetEta_	;
+      std::vector<double> GSJetPhi_	;
+      std::vector<double> GSJetTheta_	;
+       
+      std::vector<double> GSMetTruVx_   ;
+      std::vector<double> GSMetTruVy_   ;
+      std::vector<double> GSMetTruVz_   ;
+      std::vector<double> GSMetTruCharge_       ;
+      std::vector<double> GSMetTruMass_ ;
+      std::vector<double> GSMetTruPt_   ;
+      std::vector<double> GSMetTruEta_  ;
+      std::vector<double> GSMetTruPhi_  ;
+      std::vector<double> GSMetTruTheta_        ;
+       
+      std::vector<double> GSMetCalVx_   ;
+      std::vector<double> GSMetCalVy_   ;
+      std::vector<double> GSMetCalVz_   ;
+      std::vector<double> GSMetCalCharge_       ;
+      std::vector<double> GSMetCalMass_ ;
+      std::vector<double> GSMetCalPt_   ;
+      std::vector<double> GSMetCalEta_  ;
+      std::vector<double> GSMetCalPhi_  ;
+      std::vector<double> GSMetCalTheta_        ;
+       
+      std::vector<double> GSMetCNPVx_   ;
+      std::vector<double> GSMetCNPVy_   ;
+      std::vector<double> GSMetCNPVz_   ;
+      std::vector<double> GSMetCNPCharge_       ;
+      std::vector<double> GSMetCNPMass_ ;
+      std::vector<double> GSMetCNPPt_   ;
+      std::vector<double> GSMetCNPEta_  ;
+      std::vector<double> GSMetCNPPhi_  ;
+      std::vector<double> GSMetCNPTheta_        ;
 
-
-
-};
+      std::vector<double> GSMetTrueVx_  ;
+      std::vector<double> GSMetTrueVy_  ;
+      std::vector<double> GSMetTrueVz_  ;
+      std::vector<double> GSMetTrueCharge_      ;
+      std::vector<double> GSMetTrueMass_        ;
+      std::vector<double> GSMetTruePt_  ;
+      std::vector<double> GSMetTrueEta_ ;
+      std::vector<double> GSMetTruePhi_ ;
+      std::vector<double> GSMetTrueTheta_       ;
+     };
 
 class PtGreater {
          public:
@@ -139,16 +198,31 @@ class PtGreater {
 //
 // constructors and destructor
 //
-GenSimAnalyzer::GenSimAnalyzer(const edm::ParameterSet& iConfig)
-//:genParticles(iConfig.getUntrackedParameter<edm::InputTag>("GeneratorParticles"))
+GenSimAnalyzer::GenSimAnalyzer(const edm::ParameterSet& iConfig):
+//
+//	List of Input Tags
+//
+//	Note :	For every InputTag defined or a variables we need to also define it in the 
+//		class GenSimAnalyzer
+//
+//
+GenPart_( iConfig.getParameter<edm::InputTag>( "GenPart" ) ),
+GenJetAk4_(iConfig.getParameter<edm::InputTag>( "GenJetAk4")),
+GenMetTru_(iConfig.getParameter<edm::InputTag>( "GenMetTru")),
+GenMetCal_(iConfig.getParameter<edm::InputTag>( "GenMetCal")),
+trigTag_(iConfig.getParameter<edm::InputTag>("trigTag")),
+//genMetCNP_(iConfig.getParameter<edm::InputTag>( "genMetCNP")),
+//
+//	Few General Boolean or Variables
+//
+Verbose_(iConfig.getUntrackedParameter<bool>("Verbose",0)),
+SortGen_(iConfig.getUntrackedParameter<bool>("SortGen",0)),
+wantLocalFile_(iConfig.getUntrackedParameter<int>("wantLocalFile",1)),
+wantRFIOFile_(iConfig.getUntrackedParameter<int>("wantRFIOFile",0)),
+loutputFile_(iConfig.getUntrackedParameter<std::string>("loutputFile", "gsftrack.root")),
+rfoutputFile_(iConfig.getUntrackedParameter<std::string>("rfoutputFile", "/uscms_data/d2/sushil/CMSSW/MonoPhoton/CMSSW_3_8_6/src/QCDFakeRate/Analyser/test/gsftrack.root"))
 {
    //now do what ever initialization is needed
-   #if 0
-   bool wantLocalFile_=1;
-   #else
-   #endif
-
-
 }
 
 
@@ -157,16 +231,14 @@ GenSimAnalyzer::~GenSimAnalyzer()
  
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
-
-   #if 0
-   if(wantLocalFile_)
+   if(wantLocalFile_) 
    {
-	lf->Close();
-	delete lf;
+   delete outputFile_;
    }
-   #else
-   #endif
-
+   if(wantRFIOFile_) 
+   {
+   delete outputFile_;
+   }
 }
 
 
@@ -180,64 +252,101 @@ GenSimAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
    using namespace reco;
+
+   //vectors to pat objects
+   run    = iEvent.id().run();
+   event  = iEvent.id().event();
+   orbit  = iEvent.orbitNumber();
+   bx     = iEvent.bunchCrossing();
+   lumis  = iEvent.luminosityBlock();
+   isData = iEvent.isRealData();
+
+   // get the TriggerResults handle
+   edm::Handle<edm::TriggerResults> trigResults;
+   if (not iEvent.getByLabel(trigTag_, trigResults)) {
+   std::cout << ">>> TRIGGER collection does not exist !!!\n";
+   return;
+   }
+   const edm::TriggerNames & trigNames = iEvent.triggerNames(*trigResults);
+
+   for (unsigned int i=0; i<trigResults->size(); i++)
+   {
+   std::string trigName = trigNames.triggerName(i);
+  int trigResult = trigResults->accept(i); //bool not to use
+  //if (Verbose_)
+  if (trigResult)
+  if (Verbose_)
+  std::cout <<"Name of Trigger = " << trigName <<"  Trigger Result = " << trigResult <<"  Trigger Number = " << i << std::endl;
+  }	// for (unsigned int i=0; i<trigResults->size(); i++)
+
+
 // get the handle
 Handle<reco::GenParticleCollection> genParticles;
 iEvent.getByLabel("genParticles", genParticles);
 
 
-// loop over particles
-for(size_t i = 0; i < genParticles->size(); ++ i) {
 
-	// the reference p to the i-th particle:
-	const GenParticle & p = (*genParticles)[i];
+#if SortGen_
+	const reco::GenParticleCollection* genColl= &(*genParticles);
+	std::vector<const reco::GenParticle *> sortedPtrs;
+	sortedPtrs.reserve(genColl->size());
+	for (const reco::GenParticle &g : *genColl) { sortedPtrs.push_back(&g); }
+	     std::sort(sortedPtrs.begin(), sortedPtrs.end(),PtGreater());
 
-	// get pdgId:
-	int id = p.pdgId();
+	for (auto const & genPtr : sortedPtrs) {
+	   auto const & geni = *genPtr;
 
-#if 0
+	if (Verbose_)
+	std::cout<<"pt = "<<geni.pt()<<std::endl;
 
-	
-	// get status:
-	int st = p.status();
-
-	// get pointer to mother (reco::Candidate type!):
-	const Candidate * mom = p.mother();
-
-	// get pt, eta, phi, mass:
-	double pt = p.pt(), eta = p.eta(), phi = p.phi(), mass = p.mass();
-
-	genMuonPt_.push_back(p.pt());
-
-	// get vertex components:
-	double vx = p.vx(), vy = p.vy(), vz = p.vz();
-
-	// get charge:
-	int charge = p.charge();
-
-	// get no. of daughters:
-	int n = p.numberOfDaughters();	
-
-//	std::cout<<"id = "<<id<<"\tst = "<<st<<"\t pt , eta, phi, mass = "<<pt<<eta<<phi<<mass<<"\tvx,vy,vz = "<<vx<<vy<<vz<<"\tcharge = "<<charge<<"\t n = "<<n<<"\tMom = "<<&mom<<std::endl;
-
-#else
-	if ( abs(id)==11 || abs(id)==13)
-	{
-	genLepPt_.push_back(p.pt());	
-	genLepEta_.push_back(p.eta());	
-	genLepPhi_.push_back(p.phi());	
-	genLepVx_.push_back(p.vx());	
-	genLepVy_.push_back(p.vy());	
-	genLepVz_.push_back(p.vz());	
-	genLepCharge_.push_back(p.charge());	
-	genLepMass_.push_back(p.mass());	
-	//std::cout<<"test";	 
 	}
+#else
+
+   // loop over particles
+   for(size_t i = 0; i < genParticles->size(); ++ i) {
+   
+   	// the reference p to the i-th particle:
+   	const GenParticle & p = (*genParticles)[i];
+   
+   	// get pdgId:
+   	int id = p.pdgId();
+   
+   #if 0
+   	
+   	// get status:
+   	int st = p.status();
+   	// get pointer to mother (reco::Candidate type!):
+   	const Candidate * mom = p.mother();
+   	// get pt, eta, phi, mass:
+   	double pt = p.pt(), eta = p.eta(), phi = p.phi(), mass = p.mass();
+   	GSMuonPt_.push_back(p.pt());
+   	// get vertex components:
+   	double vx = p.vx(), vy = p.vy(), vz = p.vz();
+   	// get charge:
+   	int charge = p.charge();
+   	// get no. of daughters:
+   	int n = p.numberOfDaughters();	
+	if (Verbose_)
+   	std::cout<<"id = "<<id<<"\tst = "<<st<<"\t pt , eta, phi, mass = "<<pt<<eta<<phi<<mass<<"\tvx,vy,vz = "<<vx<<vy<<vz<<"\tcharge = "<<charge<<"\t n = "<<n<<"\tMom = "<<&mom<<std::endl;
+   #else
+   	if ( abs(id)==11 || abs(id)==13)
+   	{
+   	GSLepPt_.push_back(p.pt());	
+   	GSLepEta_.push_back(p.eta());	
+   	GSLepPhi_.push_back(p.phi());	
+   	GSLepVx_.push_back(p.vx());	
+   	GSLepVy_.push_back(p.vy());	
+   	GSLepVz_.push_back(p.vz());	
+   	GSLepCharge_.push_back(p.charge());	
+   	GSLepMass_.push_back(p.mass());	
+	if (Verbose_)
+   	std::cout<<"In GenParticle Loop"<<std::endl;	 
+   	}
+   #endif
+   
+   }	//for(size_t i = 0; i < genParticles->size(); ++ i) 
 #endif
 
-}	//for(size_t i = 0; i < genParticles->size(); ++ i) 
-
-
-#if 1
 // get the handle
 Handle<reco::GenJetCollection> genjets;
 iEvent.getByLabel("ak5GenJets",genjets);
@@ -258,55 +367,76 @@ if (genjets.isValid()) {
 	for (auto const & genPtr : sortedPtrs) {
 	auto const & geni = *genPtr;
 
-	genJetPt_.push_back( geni.pt());	
-	genJetEta_.push_back(geni.eta());	
-	genJetPhi_.push_back(geni.phi());	
-	genJetVx_.push_back(geni.vx());	
-	genJetVy_.push_back(geni.vy());	
-	genJetVz_.push_back(geni.vz());	
-	genJetCharge_.push_back(geni.charge());	
-	genJetMass_.push_back(geni.mass());	
+	GSJetPt_.push_back( geni.pt());	
+	GSJetEta_.push_back(geni.eta());	
+	GSJetPhi_.push_back(geni.phi());	
+	GSJetVx_.push_back(geni.vx());	
+	GSJetVy_.push_back(geni.vy());	
+	GSJetVz_.push_back(geni.vz());	
+	GSJetCharge_.push_back(geni.charge());	
+	GSJetMass_.push_back(geni.mass());	
 	//std::cout<<"jet px = "<<geni.pt()<<std::endl;
 	}
 
 }//if (genjets.isValid()) 
 
-Handle<reco::GenMETCollection> genmets;
-iEvent.getByLabel("genMetTrue",genmets);
-if (genmets.isValid()) {
-	typedef reco::GenMETCollection::const_iterator gmiter;
-	for ( gmiter i=genmets->begin(); i!=genmets->end(); i++) {
 
-	genMetPt_.push_back( i->pt());	
-	genMetEta_.push_back(i->eta());	
-	genMetPhi_.push_back(i->phi());	
-	genMetVx_.push_back(i->vx());	
-	genMetVy_.push_back(i->vy());	
-	genMetVz_.push_back(i->vz());	
-	genMetCharge_.push_back(i->charge());	
-	genMetMass_.push_back(i->mass());	
-	
-	}
-}
-
-#else
-
-
-	std::cout<<"Ramkrishna"<<std::endl;
-	
-#endif
-
-#ifdef THIS_IS_AN_EVENT_EXAMPLE
-   Handle<ExampleData> pIn;
-   iEvent.getByLabel("example",pIn);
-#endif
    
-#ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
-   ESHandle<SetupData> pSetup;
-   iSetup.get<SetupRecord>().get(pSetup);
-#endif
+   Handle<reco::GenMETCollection> genMetTru;
+   iEvent.getByLabel(GenMetTru_ ,genMetTru);
+   if (genMetTru.isValid()) {
+   	typedef reco::GenMETCollection::const_iterator gmiter;
+   	for ( gmiter i=genMetTru->begin(); i!=genMetTru->end(); i++) {
+   
+   	GSMetTruPt_.push_back( i->pt());	
+   	GSMetTruEta_.push_back(i->eta());	
+   	GSMetTruPhi_.push_back(i->phi());	
+   	GSMetTruVx_.push_back(i->vx());	
+   	GSMetTruVy_.push_back(i->vy());	
+   	GSMetTruVz_.push_back(i->vz());	
+   	GSMetTruCharge_.push_back(i->charge());	
+   	GSMetTruMass_.push_back(i->mass());	
+   	
+   	}
+   }	//if (genMetTru.isValid()) {
+   
+   Handle<reco::GenMETCollection> genMetCal;
+   iEvent.getByLabel(GenMetCal_ ,genMetCal);
+   if (genMetCal.isValid()) {
+   	typedef reco::GenMETCollection::const_iterator gmiter;
+   	for ( gmiter i=genMetCal->begin(); i!=genMetCal->end(); i++) {
+   
+   	GSMetCalPt_.push_back( i->pt());	
+   	GSMetCalEta_.push_back(i->eta());	
+   	GSMetCalPhi_.push_back(i->phi());	
+   	GSMetCalVx_.push_back(i->vx());	
+   	GSMetCalVy_.push_back(i->vy());	
+   	GSMetCalVz_.push_back(i->vz());	
+   	GSMetCalCharge_.push_back(i->charge());	
+   	GSMetCalMass_.push_back(i->mass());	
+   	
+   	}
+   }	//if (genMetCal.isValid()) {
+   
+//   Handle<reco::GenMETCollection> genMetCNP;
+//   iEvent.getByLabel(genMetCNP_ ,genMetCNP);
+//   if (genMetCNP.isValid()) {
+//   	typedef reco::GenMETCollection::const_iterator gmiter;
+//   	for ( gmiter i=genMetCNP->begin(); i!=genMetCNP->end(); i++) {
+//   
+//   	GSMetCNPPt_.push_back( i->pt());	
+//   	GSMetCNPEta_.push_back(i->eta());	
+//   	GSMetCNPPhi_.push_back(i->phi());	
+//   	GSMetCNPVx_.push_back(i->vx());	
+//   	GSMetCNPVy_.push_back(i->vy());	
+//   	GSMetCNPVz_.push_back(i->vz());	
+//   	GSMetCNPCharge_.push_back(i->charge());	
+//   	GSMetCNPMass_.push_back(i->mass());	
+//   	
+//   	}
+//   }	//if (genMetCNP.isValid()) {
 
-	tree->Fill();
+tree->Fill();
 
 }
 
@@ -315,67 +445,97 @@ if (genmets.isValid()) {
 void GenSimAnalyzer::AddBranch(std::vector<double>* vec, std::string name){
 	tree->Branch(name.c_str(),vec);
 }
+void GenSimAnalyzer::AddBranch(std::vector<int>* vec, std::string name){
+	tree->Branch(name.c_str(),vec);
+}
+void GenSimAnalyzer::AddBranch(int* vec, std::string name){
+	tree->Branch(name.c_str(),vec);
+}
 
 void GenSimAnalyzer::SetBranches(){
-	AddBranch(&genLepPt_,	"genLepPt");
-	AddBranch(&genLepEta_,	"genLepEta");
-	AddBranch(&genLepPhi_,	"genLepPhi");
-	AddBranch(&genJetPt_,	"genJetPt");
-	AddBranch(&genJetEta_,	"genJetEta");
-	AddBranch(&genJetPhi_,	"genJetPhi");
-	AddBranch(&genMetPt_,	"genMetPt");
-	AddBranch(&genMetEta_,	"genMetEta");
-	AddBranch(&genMetPhi_,	"genMetPhi");
+	//AddBranch(&,	"");
+	AddBranch(&run,		"run");
+	AddBranch(&event,	"event");
+	AddBranch(&orbit,	"orbit");
+	AddBranch(&bx,		"bx");
+	AddBranch(&lumis,	"lumis");
+	AddBranch(&isData,	"isData");
+
+	AddBranch(&GSLepPt_,	"GSLepPt");
+	AddBranch(&GSLepEta_,	"GSLepEta");
+	AddBranch(&GSLepPhi_,	"GSLepPhi");
+	AddBranch(&GSJetPt_,	"GSJetPt");
+	AddBranch(&GSJetEta_,	"GSJetEta");
+	AddBranch(&GSJetPhi_,	"GSJetPhi");
+
+	AddBranch(&GSMetTruPt_,	"GSMetPt");
+	AddBranch(&GSMetTruEta_,	"GSMetEta");
+	AddBranch(&GSMetTruPhi_,	"GSMetPhi");
+	AddBranch(&GSMetCalPt_,	"GSMetPt");
+	AddBranch(&GSMetCalEta_,	"GSMetEta");
+	AddBranch(&GSMetCalPhi_,	"GSMetPhi");
+	AddBranch(&GSMetCNPPt_,	"GSMetPt");
+	AddBranch(&GSMetCNPEta_,	"GSMetEta");
+	AddBranch(&GSMetCNPPhi_,	"GSMetPhi");
 }
 
 void GenSimAnalyzer::Clear(){
-	genLepPt_.clear();
-	genLepEta_.clear();
-	genLepPhi_.clear();
-	genJetPt_.clear();
-	genJetEta_.clear();
-	genJetPhi_.clear();
-	genMetPt_.clear();
-	genMetEta_.clear();
-	genMetPhi_.clear();
+	GSLepPt_.clear();
+	GSLepEta_.clear();
+	GSLepPhi_.clear();
+	GSJetPt_.clear();
+	GSJetEta_.clear();
+	GSJetPhi_.clear();
+	GSMetTruPt_.clear();
+	GSMetTruEta_.clear();
+	GSMetTruPhi_.clear();
+	GSMetCalPt_.clear();
+	GSMetCalEta_.clear();
+	GSMetCalPhi_.clear();
+	GSMetCNPPt_.clear();
+	GSMetCNPEta_.clear();
+	GSMetCNPPhi_.clear();
 }
 // ------------ method called once each job just before starting event loop  ------------
 void 
 GenSimAnalyzer::beginJob()
 {
+   std::cout<<"Inside beginJob()"<<std::endl;
 
-	file = new TFile("outfile.root","recreate");    
-	tree = new TTree("tree","tree");
+    if(wantLocalFile_)
+    {
+	std::cout<<"inside rootFilename_"<<std::endl;
 
+	outputFile_ = new TFile(loutputFile_.c_str(),"RECREATE");    
+        outputFile_->SetCompressionLevel(2);
+	tree = new TTree("RawSim","RAW-SIM Info");
+    }
+    if(wantRFIOFile_)
+    {
+	std::cout<<"inside rootFilename_"<<std::endl;
+
+	outputFile_ = new TFile(rfoutputFile_.c_str(),"RECREATE");    
+        outputFile_->SetCompressionLevel(2);
+	tree = new TTree("RawSim","RAW-SIM Info");
+    }
 
 	SetBranches();
-   #if 0
-	tree  = fs->make<TTree>("tree", "tree");
-	std::cout<<"inside begin job"<<std::endl;
-	if(wantLocalFile_)
-	{
-	std::cout<<"inside rootFilename_"<<std::endl;
-	lf     = new TFile(loutputFile_.c_str(), "RECREATE");
-	tree   = new TTree("myEvent","a tree with histograms");
-	}
-   #else
-   #endif
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
 GenSimAnalyzer::endJob() 
 {
-	file->Write();
-	file->Close();
-	#if 0
-	if(wantLocalFile_)
-	lf->WriteTObject(tree);
-
-	delete tree;
-	std::cout<<"Written the root file"<<std::endl;
-   #else
-   #endif
+    if(wantLocalFile_) 
+    {
+	outputFile_->Write();
+	outputFile_->Close();
+    }
+    if(wantRFIOFile_) 
+    {
+	outputFile_->Write();
+	outputFile_->Close();
+    }
 }
 
 // ------------ method called when starting to processes a run  ------------
