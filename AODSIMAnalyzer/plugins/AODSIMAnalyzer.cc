@@ -1,9 +1,9 @@
 // -*- C++ -*-
 //
-// Package:    FullSimAnalysis/RawSimAnalyzer
-// Class:      RawSimAnalyzer
+// Package:    AODSIM/AODSIMAnalyzer
+// Class:      AODSIMAnalyzer
 // 
-/**\class RawSimAnalyzer RawSimAnalyzer.cc FullSimAnalysis/RawSimAnalyzer/plugins/RawSimAnalyzer.cc
+/**\class AODSIMAnalyzer AODSIMAnalyzer.cc AODSIM/AODSIMAnalyzer/plugins/AODSIMAnalyzer.cc
 
  Description: [This is written for converting the edm format file to the root format]
 
@@ -57,12 +57,12 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "FullSimAnalysis/RawSimAnalyzer/plugins/RawSimAnalyzer.h"
+#include "FullSimAnalysis/AODSIMAnalyzer/plugins/AODSIMAnalyzer.h"
 //
 // class declaration
 //
 
-// Moved to RawSimAnalyzer.h
+// Moved to AODSIMAnalyzer.h
 //
 // constants, enums and typedefs
 //
@@ -74,12 +74,12 @@
 //
 // constructors and destructor
 //
-RawSimAnalyzer::RawSimAnalyzer(const edm::ParameterSet& iConfig) :
+AODSIMAnalyzer::AODSIMAnalyzer(const edm::ParameterSet& iConfig) :
 //
 //	List of Input Tags
 //
 //	Note :	For every InputTag defined or a variables we need to also define it in the 
-//		class RawSimAnalyzer
+//		class AODSIMAnalyzer
 //
 //
 GenPart_( iConfig.getParameter<edm::InputTag>( "GenPart" ) ),
@@ -107,7 +107,7 @@ rfoutputFile_(iConfig.getUntrackedParameter<std::string>("rfoutputFile", "/uscms
 }
 
 
-RawSimAnalyzer::~RawSimAnalyzer()
+AODSIMAnalyzer::~AODSIMAnalyzer()
 {
  
    // do anything here that needs to be done at desctruction time
@@ -130,7 +130,7 @@ RawSimAnalyzer::~RawSimAnalyzer()
 
 // ------------ method called for each event  ------------
 void
-RawSimAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+AODSIMAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
    using namespace reco;
@@ -408,17 +408,17 @@ tree->Fill();
 }
 
 // ---------Add branches ---------------------
-void RawSimAnalyzer::AddBranch(std::vector<double>* vec, std::string name){
+void AODSIMAnalyzer::AddBranch(std::vector<double>* vec, std::string name){
 	tree->Branch(name.c_str(),vec);
 }
-void RawSimAnalyzer::AddBranch(std::vector<int>* vec, std::string name){
+void AODSIMAnalyzer::AddBranch(std::vector<int>* vec, std::string name){
 	tree->Branch(name.c_str(),vec);
 }
-void RawSimAnalyzer::AddBranch(int* vec, std::string name){
+void AODSIMAnalyzer::AddBranch(int* vec, std::string name){
 	tree->Branch(name.c_str(),vec);
 }
 
-void RawSimAnalyzer::SetBranches(){
+void AODSIMAnalyzer::SetBranches(){
 	//AddBranch(&,	"");
 	AddBranch(&runNumber,		"runNumber");
 	AddBranch(&eventNumber,	"eventNumber");
@@ -456,7 +456,7 @@ void RawSimAnalyzer::SetBranches(){
 	AddBranch(&GSMetCNPPhi_,	"GSMetPhi");
 }
 
-void RawSimAnalyzer::Clear(){		// Clear only those variable which is decleared as vector
+void AODSIMAnalyzer::Clear(){		// Clear only those variable which is decleared as vector
 	pileup_bunchXing_.clear();
 	numberOfPUVertices_.clear();
 	numberOfPUVerticesMixingTruth_.clear();
@@ -483,7 +483,7 @@ void RawSimAnalyzer::Clear(){		// Clear only those variable which is decleared a
 
 // ------------ method called once each job just before starting event loop  ------------
 void 
-RawSimAnalyzer::beginJob()
+AODSIMAnalyzer::beginJob()
 {
     std::cout<<"Inside beginJob()"<<std::endl;
 
@@ -493,7 +493,7 @@ RawSimAnalyzer::beginJob()
 
 	outputFile_ = new TFile(loutputFile_.c_str(),"RECREATE");    
         outputFile_->SetCompressionLevel(2);
-	tree = new TTree("RawSim","RAW-SIM Info");
+	tree = new TTree("RawSim","AODSIM Info");
     }
     if(wantRFIOFile_)
     {
@@ -501,7 +501,7 @@ RawSimAnalyzer::beginJob()
 
 	outputFile_ = new TFile(rfoutputFile_.c_str(),"RECREATE");    
         outputFile_->SetCompressionLevel(2);
-	tree = new TTree("RawSim","RAW-SIM Info");
+	tree = new TTree("RawSim","AODSIM Info");
     }
 
 
@@ -510,7 +510,7 @@ RawSimAnalyzer::beginJob()
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
-RawSimAnalyzer::endJob() 
+AODSIMAnalyzer::endJob() 
 {
     if(wantLocalFile_) 
     {
@@ -527,7 +527,7 @@ RawSimAnalyzer::endJob()
 // ------------ method called when starting to processes a run  ------------
 /*
 void 
-RawSimAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
+AODSIMAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -535,7 +535,7 @@ RawSimAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when ending the processing of a run  ------------
 /*
 void 
-RawSimAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
+AODSIMAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
 {
 }
 */
@@ -543,7 +543,7 @@ RawSimAnalyzer::endRun(edm::Run const&, edm::EventSetup const&)
 // ------------ method called when starting to processes a luminosity block  ------------
 /*
 void 
-RawSimAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+AODSIMAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
@@ -551,14 +551,14 @@ RawSimAnalyzer::beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetu
 // ------------ method called when ending the processing of a luminosity block  ------------
 /*
 void 
-RawSimAnalyzer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
+AODSIMAnalyzer::endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&)
 {
 }
 */
 
 // ------------ method fills 'descriptions' with the allowed parameters for the module  ------------
 void
-RawSimAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
+AODSIMAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
   //The following says we do not know what parameters are allowed so do no validation
   // Please change this to state exactly what you do use, even if it is no parameters
   edm::ParameterSetDescription desc;
@@ -567,4 +567,4 @@ RawSimAnalyzer::fillDescriptions(edm::ConfigurationDescriptions& descriptions) {
 }
 
 //define this as a plug-in
-DEFINE_FWK_MODULE(RawSimAnalyzer);
+DEFINE_FWK_MODULE(AODSIMAnalyzer);

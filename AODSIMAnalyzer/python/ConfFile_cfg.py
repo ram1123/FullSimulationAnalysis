@@ -8,13 +8,13 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(5) )
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'file:/afs/cern.ch/user/r/rasharma/work/WW_Scattering/CMSFullSimulation/CMSSW_7_4_1_patch1/src/B2G-RunIISpring15DR74-00001_step1.root'
+        'file:/afs/cern.ch/user/r/rasharma/work/WW_Scattering/CMSFullSimulation/CMSSW_7_4_1_patch1/src/B2G-RunIISpring15DR74-00001_step2.root'
     )
 )
 
 hltLabel = 'HLT'
 
-process.demo = cms.EDAnalyzer('RawSimAnalyzer',
+process.demo = cms.EDAnalyzer('AODSIMAnalyzer',
 
 	#################	InputTags	#################################
 
