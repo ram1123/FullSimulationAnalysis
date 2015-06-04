@@ -5,14 +5,14 @@
 // 
 /**\class MiniAODAnalyzer MiniAODAnalyzer.cc FullSimAnalysis/MiniAODAnalyzer/plugins/MiniAODAnalyzer.cc
 
- Description: [This is written for converting the edm format file to the root format]
+ Description: [one line class summary]
 
  Implementation:
-     May 24, 2015	:	Need to put the TriggerResults
+     [Notes on implementation]
 */
 //
 // Original Author:  Ram Krishna Sharma
-//         Created:  Sat, 23 May 2015 19:14:00 GMT
+//         Created:  Thu, 04 Jun 2015 18:30:14 GMT
 //
 //
 
@@ -28,45 +28,31 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-
-
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "DataFormats/JetReco/interface/GenJetCollection.h"
-#include "DataFormats/JetReco/interface/PFJet.h"
-#include "DataFormats/JetReco/interface/PFJetCollection.h"
-#include "DataFormats/METReco/interface/GenMETCollection.h"
-#include "DataFormats/JetReco/interface/CaloJet.h"
-#include "DataFormats/JetReco/interface/CaloJetCollection.h"
-
-#include "DataFormats/METReco/interface/GenMET.h"
-#include "DataFormats/JetReco/interface/GenJet.h"
-
-// Header file for TriggerResults
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "FWCore/Common/interface/TriggerNames.h"
-
-// Header file for Pileup info
-#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
-
-#include <vector>
-
-#include "TTree.h"
-#include "TFile.h"
-#include <cmath>
-#include "TLorentzVector.h"
-#include <fstream>
-#include <iostream>
-#include "TVector.h"
-
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-
-#include "FullSimAnalysis/MiniAODAnalyzer/plugins/MiniAODAnalyzer.h"
 //
 // class declaration
 //
 
-// Moved to MiniAODAnalyzer.h
+class MiniAODAnalyzer : public edm::EDAnalyzer {
+   public:
+      explicit MiniAODAnalyzer(const edm::ParameterSet&);
+      ~MiniAODAnalyzer();
+
+      static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+
+
+   private:
+      virtual void beginJob() override;
+      virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
+      virtual void endJob() override;
+
+      //virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
+      //virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
+      //virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+      //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+
+      // ----------member data ---------------------------
+};
+
 //
 // constants, enums and typedefs
 //
@@ -78,32 +64,8 @@
 //
 // constructors and destructor
 //
-MiniAODAnalyzer::MiniAODAnalyzer(const edm::ParameterSet& iConfig) :
-//
-//	List of Input Tags
-//
-//	Note :	For every InputTag defined or a variables we need to also define it in the 
-//		class MiniAODAnalyzer
-//
-//
-GenPart_( iConfig.getParameter<edm::InputTag>( "GenPart" ) ),
-PileUp_( iConfig.getParameter<edm::InputTag>( "PileUp" ) ),
-GenJetAk4_(iConfig.getParameter<edm::InputTag>( "GenJetAk4")),
-GenJetsAk4NoNu_(iConfig.getParameter<edm::InputTag>( "GenJetsAk4NoNu")),
-GenMetTru_(iConfig.getParameter<edm::InputTag>( "GenMetTru")),
-GenMetCal_(iConfig.getParameter<edm::InputTag>( "GenMetCal")),
-trigTag_(iConfig.getParameter<edm::InputTag>("trigTag")),
-triggerEventTag_(iConfig.getParameter<edm::InputTag>("triggerEventTag")),
-//genMetCNP_(iConfig.getParameter<edm::InputTag>( "genMetCNP")),
-//
-//	Few General Boolean or Variables
-//
-Verbose_(iConfig.getUntrackedParameter<bool>("Verbose",0)),
-SortGen_(iConfig.getUntrackedParameter<bool>("SortGen",0)),
-wantLocalFile_(iConfig.getUntrackedParameter<int>("wantLocalFile",1)),
-wantRFIOFile_(iConfig.getUntrackedParameter<int>("wantRFIOFile",0)),
-loutputFile_(iConfig.getUntrackedParameter<std::string>("loutputFile", "gsftrack.root")),
-rfoutputFile_(iConfig.getUntrackedParameter<std::string>("rfoutputFile", "/uscms_data/d2/sushil/CMSSW/MonoPhoton/CMSSW_3_8_6/src/QCDFakeRate/Analyser/test/gsftrack.root"))
+MiniAODAnalyzer::MiniAODAnalyzer(const edm::ParameterSet& iConfig)
+
 {
    //now do what ever initialization is needed
 
@@ -115,14 +77,7 @@ MiniAODAnalyzer::~MiniAODAnalyzer()
  
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
-   if(wantLocalFile_) 
-   {
-   delete outputFile_;
-   }
-   if(wantRFIOFile_) 
-   {
-   delete outputFile_;
-   }
+
 }
 
 
@@ -130,302 +85,23 @@ MiniAODAnalyzer::~MiniAODAnalyzer()
 // member functions
 //
 
-
 // ------------ method called for each event  ------------
 void
 MiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
    using namespace edm;
-   using namespace reco;
-
-   //vectors to pat objects
-   runNumber		= iEvent.id().run();
-   eventNumber		= iEvent.id().event();
-   orbitNumber		= iEvent.orbitNumber();
-   bunchCrossing	= iEvent.bunchCrossing();
-   lumiBlockNumber	= iEvent.luminosityBlock();
-   isData		= iEvent.isRealData();
-
-   if (iEvent.isRealData() ){
-     runPileupinfo_ = false;
-   }
-   // get the TriggerResults handle
-   edm::Handle<edm::TriggerResults> trigResults;
-   if (not iEvent.getByLabel(trigTag_, trigResults)) {
-   std::cout << ">>> TRIGGER collection does not exist !!!\n";
-   return;
-   }
-   const edm::TriggerNames & trigNames = iEvent.triggerNames(*trigResults);
-
-   for (unsigned int i=0; i<trigResults->size(); i++)
-   {
-   std::string trigName = trigNames.triggerName(i);
-  int trigResult = trigResults->accept(i); //bool not to use
-  //if (Verbose_)
-  if (trigResult)
-  if (Verbose_)
-  std::cout <<"Name of Trigger = " << trigName <<"  Trigger Result = " << trigResult <<"  Trigger Number = " << i << std::endl;
-  }	// for (unsigned int i=0; i<trigResults->size(); i++)
-
-
-  if(runPileupinfo_)
-  {
-  // Few References: https://cmssdt.cern.ch/SDT/doxygen/CMSSW_7_4_1/doc/html/d9/d53/classPileupSummaryInfo.html
-  //
-  Handle<std::vector<PileupSummaryInfo>>  PupInfo;
-  iEvent.getByLabel(PileUp_, PupInfo);
-
-  std::vector<PileupSummaryInfo>::const_iterator PVI;
-
-  for(PVI = PupInfo->begin(); PVI != PupInfo->end(); ++PVI) {
-  if (Verbose_)
-  std::cout << " Pileup Information: bunchXing, nvtx: " << PVI->getBunchCrossing() << " " << PVI->getPU_NumInteractions() << std::endl;
-  //pileup_bunchXing = PVI->getBunchCrossing();
-  //numberOfPUVertices      = PVI->getPU_NumInteractions();
-  pileup_bunchXing_.push_back(PVI->getBunchCrossing());
-  numberOfPUVertices_.push_back(PVI->getPU_NumInteractions());
-  numberOfPUVerticesMixingTruth_.push_back(PVI->getTrueNumInteractions());
-  }
-  }	//	if(runPileupinfo_) 
-
-  // Get the TriggerEvent
-//  Handle<trigger::TriggerEvent> triggerEventHandle;
-//  iEvent.getByLabel(triggerEventTag_,triggerEventHandle);
-//
-//  if (!triggerEventHandle.isValid()) {
-//  	std::cout << "Error in getting TriggerEvent product from Event!" << std::endl;
-//	return;
-//  }
-   // A HLT path consists of many different modules - producers and filters     
-   // The event can be rejected at any filter stage along the path     
-   //                                                                                                                                                 
-   // As well as just the basic pass/fail info,       
-   // the TriggerResults object stores the index of the module in the path        
-   // which made the final decision
-   // In the case where the event was accepted, this index is therefore just    
-   // the index of the last module along the path  
 
 
 
-
-   // get the handle
-   Handle<reco::GenJetCollection> genjets;
-   iEvent.getByLabel(GenJetAk4_ ,genjets);
-
-   Handle<reco::PFJetCollection> pfjets;
-   iEvent.getByLabel( "ak4PFJets", pfjets);
-// PFJetCollection pfjc=*(pfjets.product());
+#ifdef THIS_IS_AN_EVENT_EXAMPLE
+   Handle<ExampleData> pIn;
+   iEvent.getByLabel("example",pIn);
+#endif
    
-   if (genjets.isValid()) {
-   	const reco::GenJetCollection* mygenjets = &(*genjets);
-   	std::vector<const reco::GenJet *> sortedPtrs;
-   	sortedPtrs.reserve(mygenjets->size());
-  	
-	nJets = mygenjets->size();
-
-   	for (const reco::GenJet  &g : *mygenjets){
-   	sortedPtrs.push_back(&g);
-   	}
-   
-   	std::sort(sortedPtrs.begin(), sortedPtrs.end(),PtGreater());
-   
-   
-   	if(mygenjets->size() >= 4)
-   	for (auto const & genPtr : sortedPtrs) {
-   	auto const & geni = *genPtr;
-   
-   	GSJetPt_	.push_back(geni.pt()	);	
-   	GSJetEta_	.push_back(geni.eta()	);	
-   	GSJetPhi_	.push_back(geni.phi()	);	
-   	GSJetVx_	.push_back(geni.vx()	);	
-   	GSJetVy_	.push_back(geni.vy()	);	
-   	GSJetVz_	.push_back(geni.vz()	);	
-   	GSJetCharge_	.push_back(geni.charge());	
-   	GSJetMass_	.push_back(geni.mass()	);	
-
-	//Store some Calo Jet Information:
-//	if( const CaloJet* caloJet = dynamic_cast<const CaloJet*>(&(*(geni.get()) )) )
-//	GSJetEMFraction_.push_back(caloJet->emEnergyFraction());
-//	else GSJetEMFraction_.push_back(-1.0);
-
-
-
-	if (Verbose_)
-   	std::cout<<"jet px = "<<geni.pt()<<std::endl;
-	//std::cout<<"Ecal energy = "<<geni.emEnergy()<<std::endl;
-	//std::cout<<"HCal energy = "<<geni.hadEnergy()<<std::endl;
-	//std::cout<<"Invisible energy = "<<geni.invisibleEnergy()<<std::endl;
-	//std::cout<<"auxiliary energy = "<<geni.auxiliaryEnergy()<<std::endl;
-	std::cout<<"jet Area = "<<geni.jetArea()<<std::endl;
-   	}
-   
-   }//if (genjets.isValid()) 
-
-
-   // get the handle
-   Handle<reco::GenJetCollection> genjetsNoNu;
-   iEvent.getByLabel(GenJetsAk4NoNu_ ,genjetsNoNu);
-   
-   if (genjetsNoNu.isValid()) {
-   	const reco::GenJetCollection* mygenjetsNoNu = &(*genjetsNoNu);
-   	std::vector<const reco::GenJet *> sortedPtrs;
-   	sortedPtrs.reserve(mygenjetsNoNu->size());
-
-	nJetsNoNu = mygenjetsNoNu->size();
-   
-   	for (const reco::GenJet  &g : *mygenjetsNoNu){
-   	sortedPtrs.push_back(&g);
-   	}
-   
-   	std::sort(sortedPtrs.begin(), sortedPtrs.end(),PtGreater());
-   
-   
-   	if(mygenjetsNoNu->size() >= 4)
-   	for (auto const & genPtr : sortedPtrs) {
-   	auto const & geni = *genPtr;
-   
-   	GSJetNoNuPt_.push_back( geni.pt());	
-   	GSJetNoNuEta_.push_back(geni.eta());	
-   	GSJetNoNuPhi_.push_back(geni.phi());	
-   	GSJetNoNuVx_.push_back(geni.vx());	
-   	GSJetNoNuVy_.push_back(geni.vy());	
-   	GSJetNoNuVz_.push_back(geni.vz());	
-   	GSJetNoNuCharge_.push_back(geni.charge());	
-   	GSJetNoNuMass_.push_back(geni.mass());	
-	if (Verbose_)
-   	std::cout<<"jet px = "<<geni.pt()<<std::endl;
-   	}
-   
-   }//if (genjetsNoNu.isValid()) 
-   
-   Handle<reco::GenMETCollection> genMetTru;
-   iEvent.getByLabel(GenMetTru_ ,genMetTru);
-   if (genMetTru.isValid()) {
-   	typedef reco::GenMETCollection::const_iterator gmiter;
-   	for ( gmiter i=genMetTru->begin(); i!=genMetTru->end(); i++) {
-   
-   	GSMetTruPt_.push_back( i->pt());	
-   	GSMetTruEta_.push_back(i->eta());	
-   	GSMetTruPhi_.push_back(i->phi());	
-   	GSMetTruVx_.push_back(i->vx());	
-   	GSMetTruVy_.push_back(i->vy());	
-   	GSMetTruVz_.push_back(i->vz());	
-   	GSMetTruCharge_.push_back(i->charge());	
-   	GSMetTruMass_.push_back(i->mass());	
-   	
-   	}
-   }	//if (genMetTru.isValid()) {
-   
-   Handle<reco::GenMETCollection> genMetCal;
-   iEvent.getByLabel(GenMetCal_ ,genMetCal);
-   if (genMetCal.isValid()) {
-   	typedef reco::GenMETCollection::const_iterator gmiter;
-   	for ( gmiter i=genMetCal->begin(); i!=genMetCal->end(); i++) {
-   
-   	GSMetCalPt_.push_back( i->pt());	
-   	GSMetCalEta_.push_back(i->eta());	
-   	GSMetCalPhi_.push_back(i->phi());	
-   	GSMetCalVx_.push_back(i->vx());	
-   	GSMetCalVy_.push_back(i->vy());	
-   	GSMetCalVz_.push_back(i->vz());	
-   	GSMetCalCharge_.push_back(i->charge());	
-   	GSMetCalMass_.push_back(i->mass());	
-   	
-   	}
-   }	//if (genMetCal.isValid()) {
-   
-//   Handle<reco::GenMETCollection> genMetCNP;
-//   iEvent.getByLabel(genMetCNP_ ,genMetCNP);
-//   if (genMetCNP.isValid()) {
-//   	typedef reco::GenMETCollection::const_iterator gmiter;
-//   	for ( gmiter i=genMetCNP->begin(); i!=genMetCNP->end(); i++) {
-//   
-//   	GSMetCNPPt_.push_back( i->pt());	
-//   	GSMetCNPEta_.push_back(i->eta());	
-//   	GSMetCNPPhi_.push_back(i->phi());	
-//   	GSMetCNPVx_.push_back(i->vx());	
-//   	GSMetCNPVy_.push_back(i->vy());	
-//   	GSMetCNPVz_.push_back(i->vz());	
-//   	GSMetCNPCharge_.push_back(i->charge());	
-//   	GSMetCNPMass_.push_back(i->mass());	
-//   	
-//   	}
-//   }	//if (genMetCNP.isValid()) {
-
-tree->Fill();
-}
-
-// ---------Add branches ---------------------
-void MiniAODAnalyzer::AddBranch(std::vector<double>* vec, std::string name){
-	tree->Branch(name.c_str(),vec);
-}
-void MiniAODAnalyzer::AddBranch(std::vector<int>* vec, std::string name){
-	tree->Branch(name.c_str(),vec);
-}
-void MiniAODAnalyzer::AddBranch(int* vec, std::string name){
-	tree->Branch(name.c_str(),vec);
-}
-
-void MiniAODAnalyzer::SetBranches(){
-	//AddBranch(&,	"");
-	AddBranch(&runNumber,		"runNumber");
-	AddBranch(&eventNumber,	"eventNumber");
-	AddBranch(&orbitNumber,	"orbitNumber");
-	AddBranch(&bunchCrossing,		"bunchCrossing");
-	AddBranch(&lumiBlockNumber,	"lumiBlockNumber");
-	AddBranch(&isData,	"isData");
-
-	// Pile Up info
-	AddBranch(&numberOfPUVertices_,"numberOfPUVertices");
-	AddBranch(&numberOfPUVerticesMixingTruth_,"numberOfPUVerticesMixingTruth");
-	AddBranch(&pileup_bunchXing_,"pileup_bunchXing");
-	//
-	AddBranch(&GSLepPt_,	"GSLepPt");
-	AddBranch(&GSLepEta_,	"GSLepEta");
-	AddBranch(&GSLepPhi_,	"GSLepPhi");
-	
-	AddBranch(&nJets,	"nJets");
-	AddBranch(&GSJetPt_,	"GSJetPt");
-	AddBranch(&GSJetEta_,	"GSJetEta");
-	AddBranch(&GSJetPhi_,	"GSJetPhi");
-
-	AddBranch(&nJetsNoNu,	"nJetsNoNu");
-	AddBranch(&GSJetNoNuPt_,	"GSJetNoNuPt");
-	AddBranch(&GSJetNoNuEta_,	"GSJetNoNuEta");
-	AddBranch(&GSJetNoNuPhi_,	"GSJetNoNuPhi");
-	AddBranch(&GSMetTruPt_,	"GSMetPt");
-	AddBranch(&GSMetTruEta_,	"GSMetEta");
-	AddBranch(&GSMetTruPhi_,	"GSMetPhi");
-	AddBranch(&GSMetCalPt_,	"GSMetPt");
-	AddBranch(&GSMetCalEta_,	"GSMetEta");
-	AddBranch(&GSMetCalPhi_,	"GSMetPhi");
-	AddBranch(&GSMetCNPPt_,	"GSMetPt");
-	AddBranch(&GSMetCNPEta_,	"GSMetEta");
-	AddBranch(&GSMetCNPPhi_,	"GSMetPhi");
-}
-
-void MiniAODAnalyzer::Clear(){		// Clear only those variable which is decleared as vector
-	pileup_bunchXing_.clear();
-	numberOfPUVertices_.clear();
-	numberOfPUVerticesMixingTruth_.clear();
-	GSLepPt_.clear();
-	GSLepEta_.clear();
-	GSLepPhi_.clear();
-	GSJetPt_.clear();
-	GSJetEta_.clear();
-	GSJetPhi_.clear();
-	GSJetNoNuPt_.clear();
-	GSJetNoNuEta_.clear();
-	GSJetNoNuPhi_.clear();
-	GSMetTruPt_.clear();
-	GSMetTruEta_.clear();
-	GSMetTruPhi_.clear();
-	GSMetCalPt_.clear();
-	GSMetCalEta_.clear();
-	GSMetCalPhi_.clear();
-	GSMetCNPPt_.clear();
-	GSMetCNPEta_.clear();
-	GSMetCNPPhi_.clear();
+#ifdef THIS_IS_AN_EVENTSETUP_EXAMPLE
+   ESHandle<SetupData> pSetup;
+   iSetup.get<SetupRecord>().get(pSetup);
+#endif
 }
 
 
@@ -433,43 +109,12 @@ void MiniAODAnalyzer::Clear(){		// Clear only those variable which is decleared 
 void 
 MiniAODAnalyzer::beginJob()
 {
-    std::cout<<"Inside beginJob()"<<std::endl;
-
-    if(wantLocalFile_)
-    {
-	std::cout<<"inside rootFilename_"<<std::endl;
-
-	outputFile_ = new TFile(loutputFile_.c_str(),"RECREATE");    
-        outputFile_->SetCompressionLevel(2);
-	tree = new TTree("MiniAOD","MiniAOD Info");
-    }
-    if(wantRFIOFile_)
-    {
-	std::cout<<"inside rootFilename_"<<std::endl;
-
-	outputFile_ = new TFile(rfoutputFile_.c_str(),"RECREATE");    
-        outputFile_->SetCompressionLevel(2);
-	tree = new TTree("MiniAOD","MiniAOD Info");
-    }
-
-
-	SetBranches();
 }
 
 // ------------ method called once each job just after ending the event loop  ------------
 void 
 MiniAODAnalyzer::endJob() 
 {
-    if(wantLocalFile_) 
-    {
-	outputFile_->Write();
-	outputFile_->Close();
-    }
-    if(wantRFIOFile_) 
-    {
-	outputFile_->Write();
-	outputFile_->Close();
-    }
 }
 
 // ------------ method called when starting to processes a run  ------------
