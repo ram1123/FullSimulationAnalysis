@@ -8,7 +8,7 @@
  Description: [one line class summary]
 
  Implementation:
-     [Notes on implementation]
+     4 Jun 2015	:	Trying to implement few boolean variables like verbose, and for path of output data
 */
 //
 // Original Author:  Ram Krishna Sharma
@@ -39,6 +39,9 @@
 #include "DataFormats/PatCandidates/interface/MET.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 
+
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 //
 // class declaration
 //
@@ -62,14 +65,14 @@ class MiniAODAnalyzer : public edm::EDAnalyzer {
       //virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
 
       // ----------member data ---------------------------
-      edm::EDGetTokenT<reco::VertexCollection> vtxToken_;
-      edm::EDGetTokenT<pat::MuonCollection> muonToken_;
+      edm::EDGetTokenT<reco::VertexCollection> 	vtxToken_;
+      edm::EDGetTokenT<pat::MuonCollection> 	muonToken_;
       edm::EDGetTokenT<pat::ElectronCollection> electronToken_;
-      edm::EDGetTokenT<pat::TauCollection> tauToken_;
-      edm::EDGetTokenT<pat::PhotonCollection> photonToken_;
-      edm::EDGetTokenT<pat::JetCollection> jetToken_;
-      edm::EDGetTokenT<pat::JetCollection> fatjetToken_;
-      edm::EDGetTokenT<pat::METCollection> metToken_;
+      edm::EDGetTokenT<pat::TauCollection> 	tauToken_;
+      edm::EDGetTokenT<pat::PhotonCollection> 	photonToken_;
+      edm::EDGetTokenT<pat::JetCollection> 	jetToken_;
+      edm::EDGetTokenT<pat::JetCollection> 	fatjetToken_;
+      edm::EDGetTokenT<pat::METCollection> 	metToken_;
 };
 
 //
@@ -84,14 +87,24 @@ class MiniAODAnalyzer : public edm::EDAnalyzer {
 // constructors and destructor
 //
 MiniAODAnalyzer::MiniAODAnalyzer(const edm::ParameterSet& iConfig):
-    vtxToken_(consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("vertices"))),
-    muonToken_(consumes<pat::MuonCollection>(iConfig.getParameter<edm::InputTag>("muons"))),
-    electronToken_(consumes<pat::ElectronCollection>(iConfig.getParameter<edm::InputTag>("electrons"))),
-    tauToken_(consumes<pat::TauCollection>(iConfig.getParameter<edm::InputTag>("taus"))),
-    photonToken_(consumes<pat::PhotonCollection>(iConfig.getParameter<edm::InputTag>("photons"))),
-    jetToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("jets"))),
-    fatjetToken_(consumes<pat::JetCollection>(iConfig.getParameter<edm::InputTag>("fatjets"))),
-    metToken_(consumes<pat::METCollection>(iConfig.getParameter<edm::InputTag>("mets")))
+//
+//	List of Input Tags
+//
+//	Note :	For every InputTag defined or a variables we need to also define it in 
+//		class MiniAODAnalyzer
+//
+    vtxToken_		(consumes<reco::VertexCollection>	(iConfig.getParameter<edm::InputTag>("vertices"))),
+    muonToken_		(consumes<pat::MuonCollection>		(iConfig.getParameter<edm::InputTag>("muons"))),
+    electronToken_	(consumes<pat::ElectronCollection>	(iConfig.getParameter<edm::InputTag>("electrons"))),
+    tauToken_		(consumes<pat::TauCollection>		(iConfig.getParameter<edm::InputTag>("taus"))),
+    photonToken_	(consumes<pat::PhotonCollection>	(iConfig.getParameter<edm::InputTag>("photons"))),
+    jetToken_		(consumes<pat::JetCollection>		(iConfig.getParameter<edm::InputTag>("jets"))),
+    fatjetToken_	(consumes<pat::JetCollection>		(iConfig.getParameter<edm::InputTag>("fatjets"))),
+    metToken_		(consumes<pat::METCollection>		(iConfig.getParameter<edm::InputTag>("mets")))
+//
+//	Few General Boolean or Variables
+//
+//    Verbose_		(					(iConfig.getUntrackedParameter<bool>("Verbose",0)))
 {
    //now do what ever initialization is needed
 
@@ -125,6 +138,7 @@ MiniAODAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup
     iEvent.getByToken(muonToken_, muons);
     for (const pat::Muon &mu : *muons) {
         if (mu.pt() < 5 || !mu.isLooseMuon()) continue;
+//	if (Verbose_)
         printf("muon with pt %4.1f, dz(PV) %+5.3f, POG loose id %d, tight id %d\n",
                 mu.pt(), mu.muonBestTrack()->dz(PV.position()), mu.isLooseMuon(), mu.isTightMuon(PV));
     }
