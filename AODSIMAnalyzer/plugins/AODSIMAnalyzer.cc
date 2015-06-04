@@ -32,7 +32,11 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/JetReco/interface/GenJetCollection.h"
+#include "DataFormats/JetReco/interface/PFJet.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/METReco/interface/GenMETCollection.h"
+#include "DataFormats/JetReco/interface/CaloJet.h"
+#include "DataFormats/JetReco/interface/CaloJetCollection.h"
 
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
@@ -96,7 +100,6 @@ triggerEventTag_(iConfig.getParameter<edm::InputTag>("triggerEventTag")),
 //
 Verbose_(iConfig.getUntrackedParameter<bool>("Verbose",0)),
 SortGen_(iConfig.getUntrackedParameter<bool>("SortGen",0)),
-runPileupinfo_(iConfig.getUntrackedParameter<bool>("runPileupinfo",0)),
 wantLocalFile_(iConfig.getUntrackedParameter<int>("wantLocalFile",1)),
 wantRFIOFile_(iConfig.getUntrackedParameter<int>("wantRFIOFile",0)),
 loutputFile_(iConfig.getUntrackedParameter<std::string>("loutputFile", "gsftrack.root")),
@@ -143,6 +146,9 @@ AODSIMAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    lumiBlockNumber	= iEvent.luminosityBlock();
    isData		= iEvent.isRealData();
 
+   if (iEvent.isRealData() ){
+     runPileupinfo_ = false;
+   }
    // get the TriggerResults handle
    edm::Handle<edm::TriggerResults> trigResults;
    if (not iEvent.getByLabel(trigTag_, trigResults)) {
@@ -275,6 +281,10 @@ AODSIMAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    // get the handle
    Handle<reco::GenJetCollection> genjets;
    iEvent.getByLabel(GenJetAk4_ ,genjets);
+
+   Handle<reco::PFJetCollection> pfjets;
+   iEvent.getByLabel( "ak4PFJets", pfjets);
+// PFJetCollection pfjc=*(pfjets.product());
    
    if (genjets.isValid()) {
    	const reco::GenJetCollection* mygenjets = &(*genjets);
@@ -302,6 +312,14 @@ AODSIMAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    	GSJetVz_	.push_back(geni.vz()	);	
    	GSJetCharge_	.push_back(geni.charge());	
    	GSJetMass_	.push_back(geni.mass()	);	
+
+	//Store some Calo Jet Information:
+//	if( const CaloJet* caloJet = dynamic_cast<const CaloJet*>(&(*(geni.get()) )) )
+//	GSJetEMFraction_.push_back(caloJet->emEnergyFraction());
+//	else GSJetEMFraction_.push_back(-1.0);
+
+
+
 	if (Verbose_)
    	std::cout<<"jet px = "<<geni.pt()<<std::endl;
 	//std::cout<<"Ecal energy = "<<geni.emEnergy()<<std::endl;

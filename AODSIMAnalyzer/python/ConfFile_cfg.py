@@ -33,7 +33,7 @@ process.demo = cms.EDAnalyzer('AODSIMAnalyzer',
 
 	Verbose		=	cms.untracked.bool(False),
 	SortGen		=	cms.untracked.bool(False),
-	runPileupinfo	=	cms.untracked.bool(True),
+	#runPileupinfo	=	cms.untracked.bool(True),
 	wantLocalFile	=	cms.untracked.int32(0),
 	wantRFIOFile	=	cms.untracked.int32(1),
 	loutputFile	=	cms.untracked.string("RawSim.root"),
